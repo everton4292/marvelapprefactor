@@ -22,6 +22,8 @@ val NetworkModule = module {
     single { createRetrofit(get(), BuildConfig.BASE_URL) }
 
     single { createOkHttpClient() }
+
+    single { createMarvelRepository(get(),get())}
 }
 
 fun createOkHttpClient(): OkHttpClient {

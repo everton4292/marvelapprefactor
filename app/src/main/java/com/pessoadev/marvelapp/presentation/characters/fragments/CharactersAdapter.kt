@@ -7,8 +7,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.pessoadev.marvelapp.R
 import com.pessoadev.marvelapp.data.model.Character
+import com.pessoadev.marvelapp.databinding.ItemCharacterBinding
+import com.pessoadev.marvelapp.databinding.ItemSeriesComicsBinding
 import com.pessoadev.marvelapp.util.GlideApp
-import kotlinx.android.synthetic.main.item_character.view.*
 
 class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.CharactersViewHolder>() {
 
@@ -19,24 +20,24 @@ class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.CharactersViewH
 
     private val charactersList: MutableList<Character> = mutableListOf()
 
-    inner class CharactersViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class CharactersViewHolder(private val binding: ItemCharacterBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(character: Character) {
-            itemView.textViewHeroName.text = character.name
+            binding.textViewHeroName.text = character.name
 
             GlideApp.with(context)
                 .load("${character.thumbnail?.path}.${character.thumbnail?.extension}")
-                .into(itemView.imageViewHero)
+                .into(binding.imageViewHero)
 
-            itemView.checkBoxFavorite.isChecked = character.isFavorite
+            binding.checkBoxFavorite.isChecked = character.favorite
 
-            itemView.checkBoxFavorite.setOnClickListener {
-                if (itemView.checkBoxFavorite.isChecked) {
+            binding.checkBoxFavorite.setOnClickListener {
+                if (binding.checkBoxFavorite.isChecked) {
                     favoriteListener.onClick(character)
-                    character.isFavorite = true
+                    character.favorite = true
                 } else {
                     unFavoriteListener.onClick(character)
-                    character.isFavorite = false
+                    character.favorite = false
                 }
             }
             itemView.setOnClickListener {
@@ -53,9 +54,9 @@ class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.CharactersViewH
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharactersViewHolder {
         context = parent.context
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_character, parent, false)
-        return CharactersViewHolder(view)
+        val binding = ItemCharacterBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+
+        return CharactersViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: CharactersViewHolder, position: Int) {

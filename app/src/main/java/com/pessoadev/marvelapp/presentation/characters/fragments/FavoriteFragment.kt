@@ -7,13 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
-import com.pessoadev.marvelapp.R
+import com.pessoadev.marvelapp.databinding.FavoriteFragmentBinding
 import com.pessoadev.marvelapp.presentation.detail.DetailActivity
-import kotlinx.android.synthetic.main.favorite_fragment.*
 import org.koin.android.ext.android.inject
-import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 class FavoriteFragment : Fragment() {
 
@@ -22,42 +21,52 @@ class FavoriteFragment : Fragment() {
             FavoriteFragment()
     }
 
-    private val viewModel: CharactersViewModel by sharedViewModel()
+    private val viewModel: CharactersViewModel by activityViewModels()
     private val charactersAdapter: CharactersAdapter by inject()
-    lateinit var layoutManagerGrid: GridLayoutManager
+    private lateinit var layoutManagerGrid: GridLayoutManager
+    private lateinit var binding: FavoriteFragmentBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.favorite_fragment, container, false)
+        binding = FavoriteFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         setupFavoriteRecyclerView()
         viewModel.getFavorites()
 
-        viewModel.listCharactersFavorites.observe(this, Observer {
+        viewModel.listCharactersFavorites.observe(viewLifecycleOwner) {
             if (it.isNullOrEmpty()) {
-                imageViewNoFavorite.visibility = View.VISIBLE
-                textViewNoFavorite.visibility = View.VISIBLE
+                binding.apply {
+                    imageViewNoFavorite.visibility = View.VISIBLE
+                    textViewNoFavorite.visibility = View.VISIBLE
+                }
 
             } else {
-                imageViewNoFavorite.visibility = View.INVISIBLE
-                textViewNoFavorite.visibility = View.INVISIBLE
+                binding.apply {
+                    imageViewNoFavorite.visibility = View.INVISIBLE
+                    textViewNoFavorite.visibility = View.INVISIBLE
+                }
             }
             charactersAdapter.addCharacters(it)
-        })
-
-        charactersAdapter.setOnUnFavoriteClickListener {
-            viewModel.deleteCharacter(it)
         }
 
-        charactersAdapter.setOnClickCharacterListener {
-            startActivity(Intent(activity, DetailActivity::class.java).apply {
-                putExtra("character", it)
-            })
+
+        charactersAdapter.apply {
+
+            setOnUnFavoriteClickListener {
+                viewModel.deleteCharacter(it)
+            }
+
+            setOnClickCharacterListener {
+                startActivity(Intent(activity, DetailActivity::class.java).apply {
+                    putExtra("character", it)
+                })
+            }
         }
     }
 
@@ -69,10 +78,10 @@ class FavoriteFragment : Fragment() {
                 GridLayoutManager(activity, 3)
             }
 
-        favoriteRecyclerView.adapter = charactersAdapter
-        favoriteRecyclerView.setHasFixedSize(true)
-        favoriteRecyclerView.layoutManager = layoutManagerGrid
+        binding.favoriteRecyclerView.apply {
+            adapter = charactersAdapter
+            setHasFixedSize(true)
+            layoutManager = layoutManagerGrid
+        }
     }
-
-
 }

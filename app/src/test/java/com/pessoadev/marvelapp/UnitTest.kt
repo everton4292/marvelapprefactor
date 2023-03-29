@@ -1,19 +1,32 @@
 package com.pessoadev.marvelapp
 
 import com.pessoadev.marvelapp.data.model.CharactersResponse
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNotNull
-import kotlinx.coroutines.runBlocking
+import io.mockk.coEvery
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.`when`
 
 class UnitTest : BaseUnitTest() {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private lateinit var testScope: TestScope
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Before
+    fun setup() {
+        testScope = TestScope()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun testCharacterList() {
-        runBlocking {
+        testScope.runTest {
             val responseMock = CharactersResponse(createCharacter())
-            `when`(repoMock.getCharacters(20, 1)).thenReturn(responseMock)
+            coEvery { repoMock.getCharacters(20, 1) } returns (responseMock)
             assertEquals(
                 responseMock.data.results.size,
                 repoMock.getCharacters(20, 1).data.results.size
@@ -21,25 +34,28 @@ class UnitTest : BaseUnitTest() {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun testCharacterListNotNull() {
-        runBlocking {
+        testScope.runTest {
             val responseMock = CharactersResponse(createCharacter())
-            `when`(repoMock.getCharacters(20, 1)).thenReturn(responseMock)
+            coEvery { repoMock.getCharacters(20, 1) } returns (responseMock)
+
             responseMock.data.results.forEach {
                 assertNotNull(it)
             }
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun testCharacterFavorite() {
-        runBlocking {
+        testScope.runTest{
             val responseMock = CharactersResponse(createCharacter())
-            `when`(repoMock.getCharacters(20, 1)).thenReturn(responseMock)
+            coEvery { repoMock.getCharacters(20, 1) } returns (responseMock)
             assertEquals(
-                responseMock.data.results[0].isFavorite,
-                repoMock.getCharacters(20, 1).data.results[0].isFavorite
+                responseMock.data.results[0].favorite,
+                repoMock.getCharacters(20, 1).data.results[0].favorite
             )
         }
     }

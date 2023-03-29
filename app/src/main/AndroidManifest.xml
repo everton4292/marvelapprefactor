@@ -18,6 +18,7 @@
         <activity android:name=".presentation.detail.DetailActivity" />
         <activity
             android:name=".presentation.characters.CharactersActivity"
+            android:exported="true"
             android:parentActivityName=".presentation.detail.DetailActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

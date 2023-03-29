@@ -18,11 +18,11 @@ class DetailViewModel(private val marvelRepository: MarvelRepository) : BaseView
     }
 
     fun favoriteCharacter() {
-        if (character.value?.isFavorite!!) {
-            character.value = character.value?.copy(isFavorite = false)
+        if (character.value?.favorite!!) {
+            character.value = character.value?.copy(favorite = false)
             deleteCharacter(character.value!!)
         } else {
-            character.value = character.value?.copy(isFavorite = true)
+            character.value = character.value?.copy(favorite = true)
             saveCharacter(character.value!!)
         }
     }
@@ -36,7 +36,7 @@ class DetailViewModel(private val marvelRepository: MarvelRepository) : BaseView
 
                 val comics = marvelRepository.getComicsByCharacterId(id)
                 comics.data.results.forEach {
-                    if (!it.images.isNullOrEmpty()) {
+                    if (it.images.isNotEmpty()) {
                         comicsListHelper.add(
                             ComicSerie(
                                 it.title,

@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import com.pessoadev.marvelapp.data.model.Character
 import com.pessoadev.marvelapp.domain.repository.MarvelRepository
 import com.pessoadev.marvelapp.presentation.base.BaseViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
@@ -30,7 +29,7 @@ class CharactersViewModel(private val marvelRepository: MarvelRepository) : Base
                 marvelRepository.getCharactersLocal().take(1).collect { localCharacters ->
                     response.data.results.forEach { character ->
                         val a = localCharacters.find { it.id == character.id }
-                        if (a != null) character.isFavorite = true
+                        if (a != null) character.favorite = true
                     }
                 }
 
@@ -75,7 +74,7 @@ class CharactersViewModel(private val marvelRepository: MarvelRepository) : Base
             scope.launch {
                 marvelRepository.deleteCharacterLocal(character)
                 listCharacters.value?.find { it.id == character.id }.apply {
-                    this?.isFavorite = false
+                    this?.favorite = false
                 }
 
                 listCharacters.notifyObserver()
@@ -88,10 +87,10 @@ class CharactersViewModel(private val marvelRepository: MarvelRepository) : Base
     fun verifyLocalFavorites() {
         scope.launch {
             marvelRepository.getCharactersLocal().take(1).collect { localCharacters ->
-                listCharacters.value?.forEach { it.isFavorite = false }
+                listCharacters.value?.forEach { it.favorite = false }
                 localCharacters.forEach { character ->
                     listCharacters.value?.find { it.id == character.id }.apply {
-                        this?.isFavorite = true
+                        this?.favorite = true
                     }
                 }
                 listCharacters.notifyObserver()

@@ -4,15 +4,14 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pessoadev.marvelapp.R
 import com.pessoadev.marvelapp.data.model.Character
+import com.pessoadev.marvelapp.databinding.ActivityDetailBinding
 import com.pessoadev.marvelapp.util.GlideApp
-import kotlinx.android.synthetic.main.activity_detail.*
-import kotlinx.android.synthetic.main.item_character.view.*
-import org.koin.android.viewmodel.ext.android.viewModel
-
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DetailActivity : AppCompatActivity() {
 
@@ -20,14 +19,17 @@ class DetailActivity : AppCompatActivity() {
     private var detailComicsAdapter = DetailAdapter()
     private val detailSeriesAdapter = DetailAdapter()
     lateinit var character: Character
+    private lateinit var binding: ActivityDetailBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail)
-        setSupportActionBar(toolbarDetail)
+        binding = ActivityDetailBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+        setSupportActionBar(binding.toolbarDetail)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        character = intent?.extras?.getParcelable("character")!!
+        character = intent?.extras?.getParcelable(CHARACTER)!!
         supportActionBar?.title = character.name
 
         loadCharacter(character)
@@ -36,18 +38,19 @@ class DetailActivity : AppCompatActivity() {
 
         viewModel.getComicsSeriesByCharacterId(character.id)
 
-        viewModel.comicsSeriesList.observe(this, Observer {
+        viewModel.comicsSeriesList.observe(this) {
             detailComicsAdapter.insertData(it.first)
             detailSeriesAdapter.insertData(it.second)
-        })
+        }
     }
 
     private fun loadCharacter(character: Character) {
-        textViewDescription.text = character.description
+        binding.textViewDescription.text = character.description
+        val imageViewHero = binding.imageViewHero
 
         GlideApp.with(this)
             .load("${character.thumbnail?.path}.${character.thumbnail?.extension}")
-            .into(imageViewHero.imageViewHero)
+            .into(imageViewHero)
 
     }
 
@@ -61,13 +64,13 @@ class DetailActivity : AppCompatActivity() {
             LinearLayoutManager.HORIZONTAL, false
         )
 
-        recyclerViewSeries.apply {
+        binding.recyclerViewSeries.apply {
             adapter = detailComicsAdapter
             setHasFixedSize(true)
             this.layoutManager = layoutManagerSerie
         }
 
-        recyclerViewComics.apply {
+        binding.recyclerViewComics.apply {
             adapter = detailSeriesAdapter
             setHasFixedSize(true)
             this.layoutManager = layoutManagerComic
@@ -76,13 +79,15 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_favorite, menu)
-        viewModel.character.observe(this, Observer {
-            if (it.isFavorite) {
-                menu.getItem(0).icon = getDrawable(R.drawable.ic_heath_filled_24dp)
+        viewModel.character.observe(this) {
+            if (it.favorite) {
+                menu.getItem(0).icon =
+                    AppCompatResources.getDrawable(this, R.drawable.ic_heath_filled_24dp)
             } else {
-                menu.getItem(0).icon = getDrawable(R.drawable.ic_heart_outline_24dp)
+                menu.getItem(0).icon =
+                    AppCompatResources.getDrawable(this, R.drawable.ic_heart_outline_24dp)
             }
-        })
+        }
 
         return super.onCreateOptionsMenu(menu)
     }
@@ -99,5 +104,9 @@ class DetailActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    companion object {
+        private const val CHARACTER = "character"
     }
 }

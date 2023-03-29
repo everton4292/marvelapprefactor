@@ -2,7 +2,8 @@ package com.pessoadev.marvelapp.data.model
 
 import android.os.Parcelable
 import androidx.room.*
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
+
 
 data class CharactersResponse(
     val data: Data
@@ -18,7 +19,7 @@ data class Character(
     @PrimaryKey val id: String = "",
     val name: String = "",
     val description: String = "",
-    var isFavorite : Boolean = false,
+    var favorite : Boolean = false,
     val series: Series? = null,
     val stories: Stories? = null,
     val thumbnail: Thumbnail? = null,

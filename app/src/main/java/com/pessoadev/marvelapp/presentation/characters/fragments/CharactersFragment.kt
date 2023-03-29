@@ -10,14 +10,12 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.pessoadev.marvelapp.R
 import com.pessoadev.marvelapp.data.model.Character
+import com.pessoadev.marvelapp.databinding.CharactersFragmentBinding
 import com.pessoadev.marvelapp.presentation.detail.DetailActivity
 import com.pessoadev.marvelapp.util.EndlessRecyclerViewScrollListener
-import kotlinx.android.synthetic.main.characters_fragment.*
 import org.koin.android.ext.android.inject
-import org.koin.android.viewmodel.ext.android.sharedViewModel
-
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class CharactersFragment : Fragment() {
 
@@ -26,67 +24,64 @@ class CharactersFragment : Fragment() {
             CharactersFragment()
     }
 
-    private val viewModel: CharactersViewModel by sharedViewModel()
+    private val viewModel: CharactersViewModel by activityViewModel()
     private val charactersAdapter: CharactersAdapter by inject()
     lateinit var layoutManagerGrid: GridLayoutManager
+    private lateinit var binding: CharactersFragmentBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.characters_fragment, container, false)
+        binding = CharactersFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         setupCharacterRecyclerView()
-        viewModel.getCharacters()
 
-        viewModel.listCharacters.observe(this, Observer {
-            if (it != null) updateCharacterList(it)
-        })
-
-        viewModel.isLoading.observe(this, Observer { isLoading ->
-            if (isLoading) {
-                progress.visibility = View.VISIBLE
-            } else {
-                progress.visibility = View.INVISIBLE
+        viewModel.apply {
+            listCharacters.observe(viewLifecycleOwner) {
+                if (it != null) updateCharacterList(it)
             }
-        })
 
-        viewModel.errorConnection.observe(this, Observer { hasError ->
-            if (hasError) {
-                charactersRecyclerView.visibility = View.INVISIBLE
-                layoutInternetError.visibility = View.VISIBLE
-            } else {
-                charactersRecyclerView.visibility = View.VISIBLE
-                layoutInternetError.visibility = View.INVISIBLE
+            isLoading.observe(viewLifecycleOwner) { isLoading ->
+                if (isLoading) {
+                    binding.progress.visibility = View.VISIBLE
+                } else {
+                    binding.progress.visibility = View.INVISIBLE
+                }
             }
-        })
-
-        viewModel.errorMessage.observe(this, Observer {
-            textViewErrorMessage.text = it
-        })
-
-        charactersAdapter.setOnFavoriteClickListener {
-            viewModel.saveCharacter(it)
+            errorMessage.observe(viewLifecycleOwner) {
+                binding.textViewErrorMessage.text = it
+            }
         }
 
-        charactersAdapter.setOnUnFavoriteClickListener {
-            viewModel.deleteCharacter(it)
+        charactersAdapter.apply {
+            setOnFavoriteClickListener {
+                viewModel.saveCharacter(it)
+            }
+
+            setOnUnFavoriteClickListener {
+                viewModel.deleteCharacter(it)
+            }
+
+            setOnClickCharacterListener {
+                startActivity(Intent(activity, DetailActivity::class.java).apply {
+                    putExtra("character", it)
+                })
+            }
         }
 
-        charactersAdapter.setOnClickCharacterListener {
-            startActivity(Intent(activity, DetailActivity::class.java).apply {
-                putExtra("character", it)
-            })
-        }
-
-        textViewTryAgain.setOnClickListener {
+        binding.textViewTryAgain.setOnClickListener {
             viewModel.getCharacters()
         }
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+        viewModel.getCharacters()
     }
 
     private fun setupCharacterRecyclerView() {
@@ -97,20 +92,19 @@ class CharactersFragment : Fragment() {
                 GridLayoutManager(activity, 3)
             }
 
-        charactersRecyclerView.apply {
+        binding.charactersRecyclerView.apply {
             adapter = charactersAdapter
             setHasFixedSize(true)
             this.layoutManager = layoutManagerGrid
-        }
 
-        charactersRecyclerView.addOnScrollListener(
-            object : EndlessRecyclerViewScrollListener(layoutManagerGrid) {
-                override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
-                    viewModel.getCharacters()
+            addOnScrollListener(
+                object : EndlessRecyclerViewScrollListener(layoutManagerGrid) {
+                    override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
+                        viewModel.getCharacters()
+                    }
                 }
-            }
-        )
-
+            )
+        }
     }
 
     private fun updateCharacterList(charactersList: List<Character>) {
@@ -120,8 +114,5 @@ class CharactersFragment : Fragment() {
     override fun onResume() {
         viewModel.verifyLocalFavorites()
         super.onResume()
-
-
     }
-
 }

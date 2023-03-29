@@ -7,9 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.pessoadev.marvelapp.R
 import com.pessoadev.marvelapp.data.model.ComicSerie
+import com.pessoadev.marvelapp.databinding.ItemSeriesComicsBinding
 import com.pessoadev.marvelapp.util.AppUtil
-import kotlinx.android.synthetic.main.item_series_comics.view.*
-
 
 class DetailAdapter :
     RecyclerView.Adapter<DetailAdapter.SeriesComicsViewHolder>() {
@@ -21,23 +20,23 @@ class DetailAdapter :
         notifyDataSetChanged()
     }
 
-    inner class SeriesComicsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class SeriesComicsViewHolder(private val itemBinding: ItemSeriesComicsBinding) : RecyclerView.ViewHolder(itemBinding.root) {
 
         fun bind(comicSerie: ComicSerie) {
-            itemView.textViewName.text = comicSerie.name
+            itemBinding.textViewName.text = comicSerie.name
             AppUtil.loadImageWithHeader(
                 context,
                 comicSerie.imageUrl,
-                itemView.imageViewHero
+                itemBinding.imageViewHero
             )
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeriesComicsViewHolder {
         context = parent.context
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_series_comics, parent, false)
-        return SeriesComicsViewHolder(view)
+        val binding = ItemSeriesComicsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+
+        return SeriesComicsViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: SeriesComicsViewHolder, position: Int) {
@@ -51,6 +50,4 @@ class DetailAdapter :
     private fun getItem(position: Int): ComicSerie {
         return comicSerieList[position]
     }
-
-
 }

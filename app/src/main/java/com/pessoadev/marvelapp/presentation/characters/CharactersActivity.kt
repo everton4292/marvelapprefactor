@@ -3,17 +3,20 @@ package com.pessoadev.marvelapp.presentation.characters
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.pessoadev.marvelapp.R
+import com.pessoadev.marvelapp.databinding.ActivityCharacterBinding
 import com.pessoadev.marvelapp.presentation.characters.fragments.CharactersFragment
 import com.pessoadev.marvelapp.presentation.characters.fragments.FavoriteFragment
-import kotlinx.android.synthetic.main.activity_character.*
-
 
 class CharactersActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityCharacterBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_character)
-        toolbar.title = getString(R.string.app_name)
+        binding = ActivityCharacterBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+        binding.toolbar.title = getString(R.string.app_name)
         setupViewPager()
     }
 
@@ -26,9 +29,9 @@ class CharactersActivity : AppCompatActivity() {
             addFragment(charactersListFragment, getString(R.string.characters))
             addFragment(favoriteListFragment, getString(R.string.favorites))
         }.also { characterPageAdapter ->
-            viewpager.adapter = characterPageAdapter
+            binding.viewpager.adapter = characterPageAdapter
         }
 
-        tabs.setupWithViewPager(viewpager)
+        binding.tabs.setupWithViewPager(binding.viewpager)
     }
 }

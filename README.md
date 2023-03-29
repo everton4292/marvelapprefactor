@@ -3,15 +3,23 @@
 #### Main Objecive:
 Reproduce Marvel App using the new features from Android Architecture Components.
 
+#### 1.0
+Projeto base
+
+#### 1.1e
+Atualização de débitos técnicos
+
 #### Project using:
 - MVVM Architecture
 - ViewModel & LiveData
 - Coroutines
+- ViewBinding
 - Room
 - Koin
-- Retrofit & Gson
+- Retrofit 
+- Gson
 - Glide
-- Mockito
+- MockK
 - Espresso
 
 #### Code Features:
